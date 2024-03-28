@@ -299,19 +299,19 @@ void Start(string Command){
         if (strstr(Command.c_str(),"cd ")){
             string New_Path = Command;
             New_Path.erase(0,3);
-            New_Path.erase(New_Path.begin());
-            New_Path.erase(New_Path.end());
-            cout << New_Path;
             filesystem::current_path(New_Path);
         }else if (strstr(Command.c_str(),"NetUtils") or strstr(Command.c_str(),"netutils")){
             vector<string> NetUtilsARGV;
             split(Command,NetUtilsARGV,' ');
             Console.NetUtils(NetUtilsARGV);
+        }else if (strstr(Command.c_str(),"chdir ")){
+            string New_Path = Command;
+            New_Path.erase(0,6);
+            filesystem::current_path(New_Path);
         }else if (strstr(Command.c_str(),"\t")){
             Command.erase(Command.find("\t"));
             Console.AutoComplete(ConvertToUppercase(Command));
-        }else if (strstr(Command.c_str(),"\t") and strstr(Command.c_str(),".\\")){
-            Command.erase(Command.find("\t"));
+        }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),".\\")){
             Console.PathAutoComplete(".");
         }else if (Command == "exit"){
             break;
