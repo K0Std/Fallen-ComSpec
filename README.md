@@ -10,5 +10,6 @@ Features:
 + NetUtils Command (Combines Some ipconfig.exe and netsh.exe functions in one command.)
 
 Credits:
-@K0Std
-@aafulei (Credit for headers/color.hpp)
++ @K0Std
++ @aafulei (Credit for headers/color.hpp)
+
