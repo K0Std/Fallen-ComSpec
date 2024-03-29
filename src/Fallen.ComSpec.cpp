@@ -4,32 +4,25 @@
 #include <fstream>
 #include <filesystem>
 #include <vector>
-#include <cstring>
 #include <color.hpp>
 using namespace std;
-size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
+size_t split(const string &txt, vector<string> &strs, char ch)
 {
     size_t pos = txt.find( ch );
     size_t initialPos = 0;
     strs.clear();
-
-    // Decompose statement
-    while( pos != std::string::npos ) {
+    while( pos != string::npos ) {
         strs.push_back( txt.substr( initialPos, pos - initialPos ) );
         initialPos = pos + 1;
 
         pos = txt.find( ch, initialPos );
     }
-
-    // Add the last one
-    strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+    strs.push_back( txt.substr( initialPos, min( pos, txt.size() ) - initialPos + 1 ) );
 
     return strs.size();
 }
 bool contains(string str1, string str2) {
- // returns true if str1 contains str2, else false
- 
- return (str1.find(str2) != string::npos);
+    return (str1.find(str2) != string::npos);
 }
 string ConvertToUppercase(string Input){
     string ToReturn;
@@ -280,10 +273,9 @@ class Shell{
                 }
             }
         };
-        void PathAutoComplete(string PathToRead){
+        void PathAutoComplete(){
             cout << dye::green("[ </> ] ") + dye::aqua("Possible Matches:\n");
-            string Command = "dir /b " + PathToRead;
-            this->Eval(Command);
+            system("dir /b .");
         }
 };
 void Start(string Command){
@@ -299,8 +291,10 @@ void Start(string Command){
         if (strstr(Command.c_str(),"\t")){
             Command.erase(Command.find("\t"));
             Console.AutoComplete(ConvertToUppercase(Command));
-        }else if (strstr(Command.c_str(),"\t") and strstr(Command.c_str(),".\\")){
-            Console.PathAutoComplete(".");
+        }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
+            vector<string> CMD;
+            split(Command,CMD,' ');
+            Console.PathAutoComplete();
         }else if (strstr(Command.c_str(),"cd ")){
             string New_Path = Command;
             New_Path.erase(0,3);
