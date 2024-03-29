@@ -296,7 +296,12 @@ void Start(string Command){
         if (Command == ""){
             continue;
         }
-        if (strstr(Command.c_str(),"cd ")){
+        if (strstr(Command.c_str(),"\t")){
+            Command.erase(Command.find("\t"));
+            Console.AutoComplete(ConvertToUppercase(Command));
+        }else if (strstr(Command.c_str(),"\t") and strstr(Command.c_str(),".\\")){
+            Console.PathAutoComplete(".");
+        }else if (strstr(Command.c_str(),"cd ")){
             string New_Path = Command;
             New_Path.erase(0,3);
             filesystem::current_path(New_Path);
@@ -308,11 +313,6 @@ void Start(string Command){
             string New_Path = Command;
             New_Path.erase(0,6);
             filesystem::current_path(New_Path);
-        }else if (strstr(Command.c_str(),"\t")){
-            Command.erase(Command.find("\t"));
-            Console.AutoComplete(ConvertToUppercase(Command));
-        }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),".\\")){
-            Console.PathAutoComplete(".");
         }else if (Command == "exit"){
             break;
         }else{
