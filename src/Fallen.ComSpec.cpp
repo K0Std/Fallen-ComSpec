@@ -268,7 +268,7 @@ class Shell{
             };
             cout << dye::green("[ </> ] ") + dye::aqua("Possible Matches:\n");
             for (int i = 0; i < 158; i++) {
-                if (contains(DOS_DIC[i], DOS_CMD)) {
+                if ((DOS_DIC[i].find(DOS_CMD) != string::npos)) {
                     cout << dye::aqua(ConvertToLowercase(DOS_DIC[i]) + "\n");
                 }
             }
@@ -291,7 +291,7 @@ void Start(string Command){
         if (strstr(Command.c_str(),"\t")){
             Command.erase(Command.find("\t"));
             Console.AutoComplete(ConvertToUppercase(Command));
-        }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
+        }else if (strstr(Command.c_str(),"\t") and strstr(Command.c_str(),"\\")){
             vector<string> CMD;
             split(Command,CMD,' ');
             Console.PathAutoComplete();
