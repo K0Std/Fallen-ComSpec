@@ -289,9 +289,9 @@ void Start(string Command){
             continue;
         }
         if (strstr(Command.c_str(),"\t")){
-            Command.erase(Command.find("\t"));
+            Command.erase(Command.find("^"));
             Console.AutoComplete(ConvertToUppercase(Command));
-        }else if (strstr(Command.c_str(),"\t") and strstr(Command.c_str(),"\\")){
+        }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
             vector<string> CMD;
             split(Command,CMD,' ');
             Console.PathAutoComplete();
