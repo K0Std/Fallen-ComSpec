@@ -288,7 +288,7 @@ void Start(string Command){
         if (Command == ""){
             continue;
         }
-        if (strstr(Command.c_str(),"\t")){
+        if (strstr(Command.c_str(),"^")){
             Command.erase(Command.find("^"));
             Console.AutoComplete(ConvertToUppercase(Command));
         }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
