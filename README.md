@@ -5,7 +5,7 @@ A Linux-Like Shell Built using C++.
 
 Features:
 + Lightweight and easy to use
-+ Command Auto Complete with [\t] + [Enter]
++ Command Auto Complete with [Tab] + [Enter]
 + Path Auto Complete with [^] + [Enter] (Currently Works in Current Path only.)
 + NetUtils Command (Combines Some ipconfig.exe and netsh.exe functions in one command.)
 
