@@ -25,17 +25,13 @@ bool contains(string str1, string str2) {
     return (str1.find(str2) != string::npos);
 }
 string ConvertToUppercase(string Input){
-    string ToReturn;
-    for (int i = 0;i < Input.size();i++){
-        ToReturn[i] = Input[i] - 32;
-    }
+    string ToReturn = Input;
+    transform(ToReturn.begin(), ToReturn.end(), ToReturn.begin(), ::toupper);
     return ToReturn;
 };
 string ConvertToLowercase(string Input){
     string ToReturn;
-    for (int i = 0;i < Input.size();i++){
-        ToReturn[i] = Input[i] + 32;
-    }
+    transform(ToReturn.begin(), ToReturn.end(), ToReturn.begin(), ::tolower);
     return ToReturn;
 };
 void CReadFile(string filename){
@@ -44,6 +40,22 @@ void CReadFile(string filename){
     file.open(filename);
     while (getline(file,Content)){
         cout << dye::blue("[*] ") + dye::aqua(Content) + "\n";
+    }
+    file.close();
+    string EndCommand = "del " + filename;
+    system(EndCommand.c_str());
+}
+void PAC_CReadFile(string filename){
+    ifstream file;
+    string Content;
+    file.open(filename);
+    while (getline(file,Content)){
+        if(filesystem::is_directory(Content)){
+            cout << dye::green(Content) + dye::light_blue(" -> ") + dye::green("DIR \n");
+        }
+        if (filesystem::is_regular_file(Content) && Content != filename){
+            cout << dye::white(Content) + dye::light_blue(" -> ") + dye::white("FILE \n");
+        }
     }
     file.close();
     string EndCommand = "del " + filename;
@@ -159,8 +171,8 @@ class Shell{
                 "ECHO",
                 "ENDLOCAL",
                 "ERASE",
-                "ESENTUTL",
                 "EXIT",
+                "ESENTUTL",
                 "FC",
                 "FDISK",
                 "FIND",
@@ -209,6 +221,7 @@ class Shell{
                 "NET",
                 "NETSH",
                 "NETSTAT",
+                "NETUTILS",
                 "PATH",
                 "PATHPING",
                 "PAUSE",
@@ -266,20 +279,22 @@ class Shell{
                 "XCOPY",
                 "XWIZARD"
             };
-            cout << dye::green("[ </> ] ") + dye::aqua("Possible Matches:\n");
+            cout << dye::green("[ </> ] ") + dye::aqua("Possible Matches:\n\n");
             for (int i = 0; i < 158; i++) {
-                if (contains(DOS_DIC[i], DOS_CMD)) {
-                    cout << dye::aqua(ConvertToLowercase(DOS_DIC[i]) + "\n");
+                if (strstr(DOS_DIC[i].c_str(),DOS_CMD.c_str())){
+                    cout << dye::aqua(DOS_DIC[i] + "\n");
                 }
             }
         };
         void PathAutoComplete(){
-            cout << dye::green("[ </> ] ") + dye::aqua("Possible Matches:\n");
-            system("dir /b .");
+            cout << dye::green("[ </> ] ") + dye::aqua("Possible Matching Files:\n");
+            system("dir /b > PAC.log");
+            PAC_CReadFile("PAC.log");
         }
 };
-void Start(string Command){
+void Start(){
     auto Console = Shell();
+    string Command = "";
     while (true){
         cout << dye::purple("FallenCOMSPEC: ");
         cout << dye::light_aqua(filesystem::current_path().string() + "\n");
@@ -288,34 +303,41 @@ void Start(string Command){
         if (Command == ""){
             continue;
         }
-        if (strstr(Command.c_str(),"\t")){
-            Command.erase(Command.find("\t"));
+        if (strstr(Command.c_str(),"#")){
+            Command.erase(Command.find("#"),Command.find("#"));
             Console.AutoComplete(ConvertToUppercase(Command));
-        }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
+            continue;
+        }
+        if (strstr(Command.c_str(),"^") && strstr(Command.c_str(),"\\")){
             vector<string> CMD;
             split(Command,CMD,' ');
             Console.PathAutoComplete();
+            continue;
         }else if (strstr(Command.c_str(),"cd ")){
             string New_Path = Command;
             New_Path.erase(0,3);
             filesystem::current_path(New_Path);
-        }else if (strstr(Command.c_str(),"NetUtils") or strstr(Command.c_str(),"netutils")){
+            continue;
+        }else if (strstr(Command.c_str(),"NetUtils") || strstr(Command.c_str(),"netutils")){
             vector<string> NetUtilsARGV;
             split(Command,NetUtilsARGV,' ');
             Console.NetUtils(NetUtilsARGV);
+            continue;
         }else if (strstr(Command.c_str(),"chdir ")){
             string New_Path = Command;
             New_Path.erase(0,6);
             filesystem::current_path(New_Path);
+            continue;
         }else if (Command == "exit"){
             break;
         }else{
             Console.Eval(Command);
+            continue;
         }
     };
     };
 int main(int argc,char* argv[]){
     system("title FALLEN COMSPEC");
-    Start("");
+    Start();
     return 0;
 };
