@@ -21,7 +21,7 @@ size_t split(const string &txt, vector<string> &strs, char ch)
 
     return strs.size();
 }
-bool contains(string str1, string str2) {
+bool Contains(string str1, string str2) {
     return (str1.find(str2) != string::npos);
 }
 string ConvertToUppercase(string Input){
@@ -268,7 +268,7 @@ class Shell{
             };
             cout << dye::green("[ </> ] ") + dye::aqua("Possible Matches:\n");
             for (int i = 0; i < 158; i++) {
-                if ((DOS_DIC[i].find(DOS_CMD) != string::npos)) {
+                if (Contains(DOS_DIC[i],DOS_CMD)) {
                     cout << dye::aqua(ConvertToLowercase(DOS_DIC[i]) + "\n");
                 }
             }
@@ -288,8 +288,8 @@ void Start(string Command){
         if (Command == ""){
             continue;
         }
-        if (strstr(Command.c_str(),"^")){
-            Command.erase(Command.find("^"));
+        if (strstr(Command.c_str(),"\t")){
+            Command.erase(Command.find("\t"));
             Console.AutoComplete(ConvertToUppercase(Command));
         }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
             vector<string> CMD;
