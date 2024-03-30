@@ -292,8 +292,6 @@ void Start(string Command){
             Command.erase(Command.find("\t"));
             Console.AutoComplete(ConvertToUppercase(Command));
         }else if (strstr(Command.c_str(),"^") and strstr(Command.c_str(),"\\")){
-            vector<string> CMD;
-            split(Command,CMD,' ');
             Console.PathAutoComplete();
         }else if (strstr(Command.c_str(),"cd ")){
             string New_Path = Command;
