@@ -26,17 +26,17 @@ void Start(){
         if (strstr(Command.c_str(),"\t") && strstr(Command.c_str(),"\\")){
             Console.PathAutoComplete();
             continue;
-        }else if (strstr(Command.c_str(),"cd ")){
+        }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"CD ")){
             string New_Path = Command;
             New_Path.erase(0,3);
             filesystem::current_path(New_Path);
             continue;
-        }else if (strstr(Command.c_str(),"NetUtils") || strstr(Command.c_str(),"netutils")){
+        }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"NETUTILS")){
             vector<string> NetUtilsARGV;
             conhost::Split(Command,NetUtilsARGV,' ');
             Console.NetUtils(NetUtilsARGV);
             continue;
-        }else if (strstr(Command.c_str(),"chdir ")){
+        }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"CHDIR ")){
             string New_Path = Command;
             New_Path.erase(0,6);
             filesystem::current_path(New_Path);
