@@ -11,6 +11,7 @@
 using namespace std;
 namespace conhost
 {
+    string Install_DIR = filesystem::current_path().string();
     size_t Split(const string &txt, vector<string> &strs, char ch)
     {
         size_t pos = txt.find( ch );
@@ -36,36 +37,74 @@ namespace conhost
         transform(ToReturn.begin(), ToReturn.end(), ToReturn.begin(), ::tolower);
         return ToReturn;
     };
-    void CReadFile(string filename){
-        ifstream file;
-        string Content;
-        file.open(filename);
-        while (getline(file,Content)){
-            cout << dye::blue("[*] ") + dye::aqua(Content) + "\n";
+    string Remove_SUBSTR(string Text,string Substring){
+        size_t Index = Text.find(Substring);
+        string Operand = Text;
+        if (Index != string::npos){
+            Operand.erase(Index,(Substring.length()));
+        }else{
+            cout << dye::red("[-] ") + dye::light_aqua("Runtime ERR in [incl\\Fallen_COMSPEC.hpp] at ns(conhost):Remove_SUBSTR");
         }
-        file.close();
-        string EndCommand = "del " + filename;
-        system(EndCommand.c_str());
-    }
-    void PAC_CReadFile(string filename){
-        ifstream file;
-        string Content;
-        file.open(filename);
-        while (getline(file,Content)){
-            if(filesystem::is_directory(Content)){
-                cout << dye::green(Content) + dye::light_blue(" -> ") + dye::green("DIR \n");
-            }
-            if (filesystem::is_regular_file(Content) && Content != filename){
-                cout << dye::white(Content) + dye::light_blue(" -> ") + dye::white("FILE \n");
-            }
-        }
-        file.close();
-        string EndCommand = "del " + filename;
-        system(EndCommand.c_str());
+        return Operand;
     }
     class Shell{
+        private:
+            void CReadFile(string filename,int Is_Special_File){
+                ifstream file;
+                string Content;
+                string EndCommand = "del " + filename;
+                switch (Is_Special_File){
+                    case 0:
+                        file.open(filename);
+                        while (getline(file,Content)){
+                            cout << dye::blue("[*] ") + dye::aqua(Content) + "\n";
+                        }
+                        file.close();
+                        system(EndCommand.c_str());
+                        break;
+                    case 1:
+                        file.open(filename);
+                        while (getline(file,Content)){
+                            if(filesystem::is_directory(Content)){
+                                cout << dye::green(Content) + dye::light_blue(" -> ") + dye::green("DIR \n");
+                            }
+                            if (filesystem::is_regular_file(Content) && Content != filename){
+                                cout << dye::white(Content) + dye::light_blue(" -> ") + dye::white("FILE \n");
+                            }
+                        }
+                        file.close();
+                        system(EndCommand.c_str());
+                        break;
+                    case 2:
+                        file.open(filename);
+                        while (getline(file,Content)){
+                            if (strstr(Content.c_str(),"[STRING] ")){
+                                string ARG_NAME = Remove_SUBSTR(Content,"[STRING] ");
+                                cout << dye::green("Argument Type : ") + dye::white("String ") + dye::aqua(ARG_NAME + "\n");
+                            }
+                            if (strstr(Content.c_str(),"[SWITCH] ")){
+                                string ARG_NAME = Remove_SUBSTR(Content,"[SWITCH] ");
+                                cout << dye::green("Argument Type : ") + dye::white("Switch ") + dye::aqua(ARG_NAME + "\n");
+                            }
+                            if (strstr(Content.c_str(),"[INT] ")){
+                                string ARG_NAME = Remove_SUBSTR(Content,"[INT] ");
+                                cout << dye::green("Argument Type : ") + dye::white("Integer ") + dye::aqua(ARG_NAME + "\n");
+                            }
+                            if (strstr(Content.c_str(),"[BOOLEAN] ")){
+                                string ARG_NAME = Remove_SUBSTR(Content,"[BOOLEAN] ");
+                                cout << dye::green("Argument Type : ") + dye::white("1-Bit / Boolean ") + dye::aqua(ARG_NAME + "\n");
+                            }
+                            if (Content[0] == '#'){
+                                string Description = Remove_SUBSTR(Content,"#");
+                                cout << dye::light_green(" |") + dye::aqua(Description + "\n");
+                            }
+                        }
+                        break;
+                    default:
+                        cout << dye::red("[-] ") + dye::light_blue("Runtime ERR in [incl\\Fallen_COMSPEC.hpp] at class(Shell):meth(CReadFile)\nInstall DIR: " + Install_DIR + "\n");
+                }
+            }
         public:
-            int ERR_CODE;
             string FULL_EXECUTION_PATH = filesystem::current_path().string();
             string ConsoleType;
             void Eval(string Command){
@@ -92,25 +131,25 @@ namespace conhost
                         system("del NetUtils.log");
                     }else if (argv[i] == "/Show:Configuration"){
                         system("ipconfig > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         break;
                     }else if (argv[i] == "/Show:AdvancedConfiguration"){
                         system("ipconfig /allcompartments /all > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         break;
                     }else if (argv[i] == "/Administrative" and argv[i + 1] == "/Configuration:Reset"){
                         system("ipconfig /flushdns > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         system("ipconfig /registerdns > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         system("ipconfig /release > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         system("ipconfig /renew > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         system("netsh int ip reset > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         system("netsh winsock reset > NetUtils.log");
-                        CReadFile("NetUtils.log");
+                        CReadFile("NetUtils.log",0);
                         break;
                     }else{
                         cout << dye::red("[-] ") + dye::blue("NetUtils: Unknown Argument.\n");
@@ -292,8 +331,16 @@ namespace conhost
             void PathAutoComplete(){
                 cout << dye::green("[ </> ] ") + dye::aqua("Possible Matching Files:\n\n");
                 system("dir /b > PAC.log");
-                PAC_CReadFile("PAC.log");
+                CReadFile("PAC.log",1);
                 cout << "\n";
+            }
+            void Generate_CMD_HELP(string Command){
+                string Help_filename = Command + ".arghelp";
+                if(filesystem::exists(Help_filename) && filesystem::is_regular_file(Help_filename)){
+                    CReadFile(Help_filename,2);
+                }else{
+                    cout << dye::red("[-] ") + dye::light_aqua("Unable to find Help file.\n");
+                }
             }
     };
 }
