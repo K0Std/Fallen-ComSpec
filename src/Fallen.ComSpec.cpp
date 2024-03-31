@@ -9,6 +9,7 @@
 using namespace std;
 void Start(){
     auto Console = conhost::Shell();
+    conhost::Install_DIR = filesystem::current_path().string();
     string Command = "";
     while (true){
         cout << dye::purple("FallenCOMSPEC: ");
@@ -30,6 +31,12 @@ void Start(){
             string New_Path = Command;
             New_Path.erase(0,3);
             filesystem::current_path(New_Path);
+            continue;
+        }else if (strstr(Command.c_str(),"/?")){
+            vector<string> Args;
+            conhost::Split(Command,Args,' ');
+            string CMD_Name = Args[0];
+            Console.Generate_CMD_HELP(CMD_Name);
             continue;
         }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"NETUTILS")){
             vector<string> NetUtilsARGV;
