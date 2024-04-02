@@ -9,6 +9,49 @@
 #include <vector>
 #include <color.hpp>
 using namespace std;
+namespace console_tabs
+{
+    struct tab
+    {
+        int ID;
+        string DisplayName;
+        string HistoryFile;
+        tab(string DisplayName,int ID,string HistoryStore){
+            this->ID = ID;
+            this->HistoryFile = HistoryStore;
+            this->DisplayName = DisplayName;
+        };
+    };
+    tab ActiveTab("Default",0,"Default.history");
+    vector<tab> Tabs;
+    void AddTab(tab Tab)
+    {
+        Tabs.push_back(Tab);
+    }
+    void ClearScreen(){
+        system("cls");
+        for(int i = 0;i < Tabs.size();i++){
+            if(Tabs[i].ID != ActiveTab.ID){
+                cout << dye::white(Tabs[i].DisplayName) + dye::green(" | ");
+            }
+            if(Tabs[i].ID == ActiveTab.ID){
+                cout << dye::aqua(Tabs[i].DisplayName) + dye::green(" | ");
+            }
+        }
+        cout << dye::light_purple("\n[--------------------------------------------------------]\n");
+    };
+    class Initializer
+    {
+    public:
+        Initializer()
+        {
+            AddTab(ActiveTab);
+            ClearScreen();
+            ClearScreen();
+        }
+    };
+    static Initializer consoleTabsInitializer;
+}
 namespace conhost
 {
     string Install_DIR = filesystem::current_path().string();
@@ -105,11 +148,115 @@ namespace conhost
                 }
             }
         public:
+            void DumpHistory(string Command,string HistoryFile){
+                string Dumper = "echo " + Command + " >> " + HistoryFile;
+                system(Dumper.c_str());
+            };
+            void ReadHistory(string HistoryFile){
+                ifstream FileHandle;
+                string Content;
+                if(filesystem::exists(HistoryFile) && filesystem::is_regular_file(HistoryFile)){
+                    FileHandle.open(HistoryFile);
+                }else{
+                    cout << dye::red("[-] ") + dye::light_blue("Tab History File Doesn't Exist.\n");
+                }
+                while (getline(FileHandle,Content)){
+                    if (strstr(ConvertToUppercase(Content).c_str(),"CREATETAB")){
+                        continue;
+                    }else if(strstr(ConvertToUppercase(Content).c_str(),"SWITCHTAB")){
+                        continue;
+                    }else{
+                        Eval(Content);
+                    }
+                }
+                FileHandle.close();
+            }
             string FULL_EXECUTION_PATH = filesystem::current_path().string();
-            string ConsoleType;
             void Eval(string Command){
-                const char *CppCommand = Command.c_str();
-                system(CppCommand);
+                if (Command == ""){
+                }
+                if (strstr(Command.c_str(),"\t") && !(strstr(Command.c_str(),"\\"))){
+                    Command.erase(Command.find("\t"),Command.find("\t"));
+                    AutoComplete(conhost::ConvertToUppercase(Command));
+                }
+                if (strstr(Command.c_str(),"\t") && strstr(Command.c_str(),"\\")){
+                    PathAutoComplete();
+                }else if (strstr(Command.c_str(),"/FCHelp")){
+                    vector<string> Args;
+                    conhost::Split(Command,Args,' ');
+                    string CMD_Name = Args[0];
+                    Generate_CMD_HELP(CMD_Name);
+                }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"CD ")){
+                    string New_Path = Command;
+                    New_Path.erase(0,3);
+                    filesystem::current_path(New_Path);
+                }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"CLS")){
+                    console_tabs::ClearScreen();
+                }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"NETUTILS")){
+                    vector<string> NetUtilsARGV;
+                    conhost::Split(Command,NetUtilsARGV,' ');
+                    NetUtils(NetUtilsARGV);
+                }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"CREATETAB")){
+                    vector<string> CTARGV;
+                    conhost::Split(Command,CTARGV,' ');
+                    PrepTabs(CTARGV);
+                }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"SWITCHTAB")){
+                    vector<string> STARGV;
+                    conhost::Split(Command,STARGV,' ');
+                    PrepSwitchTabs(STARGV);
+                }else if (strstr(conhost::ConvertToUppercase(Command.c_str()).c_str(),"CHDIR ")){
+                    string New_Path = Command;
+                    New_Path.erase(0,6);
+                    filesystem::current_path(New_Path);
+                }else if (Command == "exit"){
+                    for (int i = 0;i < console_tabs::Tabs.size();i++){
+                        Command = "del " + console_tabs::Tabs[i].HistoryFile;
+                        system(Command.c_str());
+                    }
+                    exit(0);
+                }else{
+                    const char *CppCommand = Command.c_str();
+                    system(CppCommand);
+                }
+            };
+            void PrepTabs(vector<string> Argv){
+                string DName,HistoryFile;
+                int Identifier;
+                for(int i = 1;i < Argv.size();i++){
+                    if (Argv[i] == "/Display"){
+                        DName = Argv[(i + 1)];
+                    }else if(Argv[i] == "/Identifier" || Argv[i] == "/ID"){
+                        Identifier = stoi(Argv[i + 1]);
+                    }else if(Argv[i] == "/HistoryFile"){
+                        HistoryFile = Argv[i + 1];
+                    }else{
+                        cout << dye::red("[-] ") + dye::light_aqua("CreateTab: Unknown Argument");
+                    }
+                }
+                CreateTab(DName,Identifier,HistoryFile);
+            };
+            void PrepSwitchTabs(vector<string> Argv){
+                int Identifier;
+                for(int i = 1;i < Argv.size();i++){
+                    if(Argv[i] == "/Identifier" || Argv[i] == "/ID"){
+                        Identifier = stoi(Argv[i + 1]);
+                    }else{
+                        cout << dye::red("[-] ") + dye::light_aqua("SwitchTab: Unknown Argument");
+                    }
+                }
+                SwitchTab(Identifier);
+            };
+            void CreateTab(string DisplayName,int ID,string HistoryStore){
+                console_tabs::tab NewTab(DisplayName,ID,HistoryStore);
+                console_tabs::ActiveTab = NewTab;
+                console_tabs::AddTab(NewTab);
+                console_tabs::ClearScreen();
+            };
+            void SwitchTab(int ID){
+                console_tabs::ActiveTab = console_tabs::Tabs[ID];
+                console_tabs::ClearScreen();
+                ReadHistory(console_tabs::Tabs[ID].HistoryFile);
+                
             };
             void NetUtils(vector<string> argv){
                 for (int i = 1; i < argv.size(); i++){
