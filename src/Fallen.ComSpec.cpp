@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <windows.h>
+#include <unistd.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <vector>
-#include <color.hpp>
+#include "headers/color.hpp"
 #include "headers/Fallen_COMSPEC.hpp"
 using namespace std;
 void Start(){
@@ -16,14 +16,26 @@ void Start(){
     while (true){
         cout << dye::purple("FallenCOMSPEC: ");
         cout << dye::light_aqua(filesystem::current_path().string() + "\n");
-        cout << dye::green("$ ");
+        system("whoami > .uid");
+        ifstream file;
+        string Content;
+        file.open(".uid");
+        while (getline(file,Content)){
+            if (Content == "root")
+            {
+                cout << dye::light_red("# ");
+                break;
+            } else {
+                cout << dye::light_green("$ ");
+                break;
+            }
+        }
         getline(cin,Command);
         Console.DumpHistory(Command,console_tabs::ActiveTab.HistoryFile);
         Console.Eval(Command);
     };
     };
 int main(int argc,char* argv[]){
-    system("title FALLEN COMSPEC");
     Start();
     return 0;
 };
